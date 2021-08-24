@@ -8,7 +8,7 @@ EVM Smart Contract to whitelist, claim and release tokens in a launchpad fashion
 
 Binance Smart Chain: [...](...)
 
-Binance Smart Chain Testnet: [0x098b5e10859a3c2cfb3b3e09aafbc6c12d632f9b](https://testnet.bscscan.com/address/0x098b5e10859a3c2cfb3b3e09aafbc6c12d632f9b)
+Binance Smart Chain Testnet: []()
 
 ## Summary
 
@@ -23,7 +23,6 @@ The `totalClaimable` amount is determined by the `balance` of the `launchedToken
 Before the `start` of the claiming process, the `owner` has the ability to `whitelistAddress` or `whitelistAddresses`.
 
 Those whitelisted addresses will be able to participate claiming tokens during the `launch`.
-
 
 
 ## Functionalities

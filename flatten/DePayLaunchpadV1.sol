@@ -1280,11 +1280,31 @@ contract DePayLaunchpadV1 is Ownable, ReentrancyGuard {
   }
 
   // Whitelist address (enables them to claim launched token)
-  function setWhitelist(
+  function _whitelistAddress(
+    address _address,
+    bool status
+  ) private returns(bool) {
+    whitelist[_address] = status;
+    return true;
+  }
+
+  // Whitelist single address
+  function whitelistAddress(
     address _address,
     bool status
   ) external onlyOwner returns(bool) {
-    whitelist[_address] = status;
+    require(_whitelistAddress(_address, status));
+    return true;
+  }
+
+  // Whitelist multiple addresses
+  function whitelistAddresses(
+    address[] memory _addresses,
+    bool status
+  ) external onlyOwner returns(bool) {
+    for (uint256 i = 0; i < _addresses.length; i++) {
+      require(_whitelistAddress(_addresses[i], status));
+    }
     return true;
   }
 
