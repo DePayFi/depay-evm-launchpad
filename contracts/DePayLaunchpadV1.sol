@@ -3,12 +3,12 @@
 pragma solidity >=0.8.6 <0.9.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "hardhat/console.sol";
 
-contract DePayLaunchpadV1 is Ownable {
+contract DePayLaunchpadV1 is Ownable, ReentrancyGuard {
   
   using SafeMath for uint;
   using SafeERC20 for ERC20;
@@ -119,11 +119,69 @@ contract DePayLaunchpadV1 is Ownable {
   function claim(
     address forAddress,
     uint256 claimedAmount
-  ) external onlyInProgress returns(bool) {
+  ) external onlyInProgress nonReentrant returns(bool) {
     require(whitelist[forAddress], 'Address has not been whitelisted for this launch!');
     uint256 payedAmount = claimedAmount.div(10**ERC20(paymentToken).decimals()).mul(price);
     ERC20(paymentToken).safeTransferFrom(msg.sender, address(this), payedAmount);
     claims[forAddress] = claims[forAddress].add(claimedAmount);
+    totalClaimed = totalClaimed.add(claimedAmount);
+    require(totalClaimed <= totalClaimable, 'Claiming attempt exceeds totalClaimable amount!');
+    return true;
+  }
+
+  // Limit executions to launchpad ended state only
+  modifier onlyEnded() {
+    require(
+      endTime > 0,
+      "Launchpad has not been started yet!"
+    );
+    require(
+      endTime < block.timestamp,
+      "Launchpad has not ended yet!"
+    );
+    _;
+  }
+
+  // Releases ones claim for the launched token.
+  // Can be executed by anyone, but makes sure the claimed token is released to claimer and not to the sender.
+  function _release(
+    address forAddress
+  ) private returns(bool) {
+    require(claims[forAddress] > 0, 'Nothing to release!');
+    ERC20(launchedToken).safeTransfer(forAddress, claims[forAddress]);
+    claims[forAddress] = 0;
+    return true;
+  }
+
+  // Releases claim for a single address
+  function release(
+    address forAddress
+  ) external onlyEnded nonReentrant returns(bool) {
+    require(_release(forAddress));
+    return true;
+  }
+
+  // Releases claim for multiple addresses
+  function multiRelease(
+    address[] memory forAddresses
+  ) external onlyEnded nonReentrant returns(bool) {
+    for (uint256 i = 0; i < forAddresses.length; i++) {
+      require(_release(forAddresses[i]));
+    }
+    return true;
+  }
+
+  // Releases payment token to the owner.
+  function releasePayments() external onlyEnded onlyOwner nonReentrant returns(bool) {
+    ERC20(paymentToken).transfer(owner(), ERC20(paymentToken).balanceOf(address(this)));
+    return true;
+  }
+
+  // Releases unclaimed launched tokens back to the owner.
+  function releaseUnclaimed() external onlyEnded onlyOwner nonReentrant returns(bool) {
+    uint256 unclaimed = totalClaimable-totalClaimed;
+    ERC20(launchedToken).transfer(owner(), unclaimed);
+    totalClaimable = totalClaimable.sub(unclaimed);
     return true;
   }
 }
