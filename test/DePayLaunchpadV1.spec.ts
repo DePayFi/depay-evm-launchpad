@@ -142,16 +142,15 @@ describe('DePayLaunchpadV1', function() {
 
   it('does not allow others to whitelist addresses', async ()=> {
     await expect(
-      launchpad.connect(otherWallet).setWhitelist(otherWallet.address, true)
+      launchpad.connect(otherWallet).whitelistAddress(otherWallet.address, true)
     ).to.be.revertedWith(
       'Ownable: caller is not the owner'
     )
   })
 
   it('allows the owner to whitelist addresses', async ()=> {
-    await launchpad.connect(ownerWallet).setWhitelist(otherWallet.address, true);
-    await launchpad.connect(ownerWallet).setWhitelist(anotherWallet.address, true);
-    await launchpad.connect(ownerWallet).setWhitelist(yetAnotherWallet.address, true);
+    await launchpad.connect(ownerWallet).whitelistAddress(otherWallet.address, true);
+    await launchpad.connect(ownerWallet).whitelistAddresses([anotherWallet.address, yetAnotherWallet.address], true);
     expect(await launchpad.whitelist(otherWallet.address)).to.eq(true);
   })
 
