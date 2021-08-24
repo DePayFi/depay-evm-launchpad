@@ -13,16 +13,18 @@ describe('DePayLaunchpadV1', function() {
       launchpad,
       launchedToken,
       paymentToken,
-      amountLaunched
+      amountLaunched,
+      splitReleaseWallet
   
   let DAY = 86400;    
   let runTime = 300000;
   let endTime = now() + runTime;
   let price = ethers.utils.parseUnits('2.1', 18);
   let totalClaimed = ethers.BigNumber.from('0');
+  let splitReleaseAmount = ethers.utils.parseUnits('10', 18);
 
   beforeEach(async ()=>{
-    [ownerWallet, otherWallet, anotherWallet, yetAnotherWallet] = await ethers.getSigners();
+    [ownerWallet, otherWallet, anotherWallet, yetAnotherWallet, splitReleaseWallet] = await ethers.getSigners();
   })
 
   it('wants to launch an existing token accepting another token as means of payment', async ()=>{
@@ -37,7 +39,12 @@ describe('DePayLaunchpadV1', function() {
 
   it('does not allow to initialize the launchpad by anybody else but the owner', async ()=>{
     await expect(
-      launchpad.connect(otherWallet).init(launchedToken.address, paymentToken.address)
+      launchpad.connect(otherWallet).init(
+        launchedToken.address,
+        paymentToken.address,
+        splitReleaseAmount,
+        splitReleaseWallet.address
+      )
     ).to.be.revertedWith(
       'Ownable: caller is not the owner'
     )
@@ -45,7 +52,12 @@ describe('DePayLaunchpadV1', function() {
 
   it('does not allow to initialize with 0 claimable tokens', async ()=>{
     await expect(
-      launchpad.connect(ownerWallet).init(launchedToken.address, paymentToken.address)
+      launchpad.connect(ownerWallet).init(
+        launchedToken.address,
+        paymentToken.address,
+        splitReleaseAmount,
+        splitReleaseWallet.address
+      )
     ).to.be.revertedWith(
       'You need to initalize the launchpad with claimable tokens!'
     )
@@ -61,21 +73,38 @@ describe('DePayLaunchpadV1', function() {
 
   it('allows to initialize the launchpad by the owner', async ()=>{
     await launchedToken.connect(ownerWallet).transfer(launchpad.address, amountLaunched);
-    await launchpad.connect(ownerWallet).init(launchedToken.address, paymentToken.address);
+    await launchpad.connect(ownerWallet).init(
+      launchedToken.address,
+      paymentToken.address,
+      splitReleaseAmount,
+      splitReleaseWallet.address
+    );
     expect(await launchpad.launchedToken()).to.equal(launchedToken.address);
     expect(await launchpad.paymentToken()).to.equal(paymentToken.address);
     expect(await launchpad.totalClaimable()).to.equal(amountLaunched);
     expect(await launchpad.totalClaimed()).to.equal(0);
+    expect(await launchpad.splitReleaseAmount()).to.equal(splitReleaseAmount);
+    expect(await launchpad.splitReleaseAddress()).to.equal(splitReleaseWallet.address);
   })
 
   it('does not allow to initialize the launchpad multiple times', async ()=>{
     await expect(
-      launchpad.connect(ownerWallet).init(launchedToken.address, paymentToken.address)
+      launchpad.connect(ownerWallet).init(
+        launchedToken.address,
+        paymentToken.address,
+        splitReleaseAmount,
+        splitReleaseWallet.address
+      )
     ).to.be.revertedWith(
       'You can only initialize a launchpad once!'
     )
     await expect(
-      launchpad.connect(ownerWallet).init(launchedToken.address, paymentToken.address)
+      launchpad.connect(ownerWallet).init(
+        launchedToken.address,
+        paymentToken.address,
+        splitReleaseAmount,
+        splitReleaseWallet.address
+      )
     ).to.be.revertedWith(
       'You can only initialize a launchpad once!'
     )
@@ -107,7 +136,7 @@ describe('DePayLaunchpadV1', function() {
   
   it('does not allow people to claim if launchpad has not been started yet', async ()=> {
     await expect(
-      launchpad.connect(otherWallet).claim(otherWallet.address, ethers.utils.parseUnits('1', 18))
+      launchpad.connect(otherWallet).claim(otherWallet.address, ethers.utils.parseUnits('110', 18), true)
     ).to.be.revertedWith(
       'Launchpad has not been started yet!'
     )
@@ -134,7 +163,7 @@ describe('DePayLaunchpadV1', function() {
 
   it('does not allow people to claim an allocation if they havent been whitelisted', async ()=>{
     await expect(
-      launchpad.connect(otherWallet).claim(otherWallet.address, ethers.utils.parseUnits('1', 18))
+      launchpad.connect(otherWallet).claim(otherWallet.address, ethers.utils.parseUnits('110', 18), true)
     ).to.be.revertedWith(
       'Address has not been whitelisted for this launch!'
     )
@@ -156,61 +185,65 @@ describe('DePayLaunchpadV1', function() {
 
   it('requires to pay enough of the payment token in order to store a claim', async ()=>{
     await expect(
-      launchpad.connect(otherWallet).claim(otherWallet.address, ethers.utils.parseUnits('1', 18))
+      launchpad.connect(otherWallet).claim(otherWallet.address, ethers.utils.parseUnits('110', 18), true)
     ).to.be.revertedWith(
       'ERC20: transfer amount exceeds balance'
     )
   })
 
   it('allows people to claim an allocation if they have been whitelisted', async ()=>{
-    let claimedAmount = ethers.utils.parseUnits('1', 18);
+    let claimedAmount = ethers.utils.parseUnits('110', 18);
     let payedAmount = claimedAmount.div(ethers.BigNumber.from((10**18).toString())).mul(price);
     await paymentToken.connect(ownerWallet).transfer(otherWallet.address, payedAmount);
     await paymentToken.connect(otherWallet).approve(launchpad.address, payedAmount);
     await expect(()=> 
-      launchpad.connect(otherWallet).claim(otherWallet.address, claimedAmount)
+      launchpad.connect(otherWallet).claim(otherWallet.address, claimedAmount, true)
     ).to.changeTokenBalance(paymentToken, launchpad, payedAmount);
     totalClaimed = totalClaimed.add(claimedAmount);
     expect(await launchpad.claims(otherWallet.address)).to.eq(claimedAmount);
     expect(await launchpad.totalClaimed()).to.eq(totalClaimed);
+    expect(await launchpad.splitReleases(otherWallet.address)).to.eq(true);
   })
 
   it('just increases someones claim if you claim a second time', async ()=>{
-    let claimedAmount = ethers.utils.parseUnits('1', 18);
+    let claimedAmount = ethers.utils.parseUnits('110', 18);
     let payedAmount = claimedAmount.div(ethers.BigNumber.from((10**18).toString())).mul(price);
     await paymentToken.connect(ownerWallet).transfer(otherWallet.address, payedAmount);
     await paymentToken.connect(otherWallet).approve(launchpad.address, payedAmount);
     await expect(()=> 
-      launchpad.connect(otherWallet).claim(otherWallet.address, claimedAmount)
+      launchpad.connect(otherWallet).claim(otherWallet.address, claimedAmount, true)
     ).to.changeTokenBalance(paymentToken, launchpad, payedAmount);
     totalClaimed = totalClaimed.add(claimedAmount);
     expect(await launchpad.claims(otherWallet.address)).to.eq(claimedAmount.mul(ethers.BigNumber.from('2')));
     expect(await launchpad.totalClaimed()).to.eq(totalClaimed);
+    expect(await launchpad.splitReleases(otherWallet.address)).to.eq(true);
   })
 
   it('allows ownerWallet to claim in the name of anotherWallet', async ()=>{
-    let claimedAmount = ethers.utils.parseUnits('1', 18);
+    let claimedAmount = ethers.utils.parseUnits('110', 18);
     let payedAmount = claimedAmount.div(ethers.BigNumber.from((10**18).toString())).mul(price);
     await paymentToken.connect(ownerWallet).approve(launchpad.address, payedAmount);
     await expect(()=> 
-      launchpad.connect(ownerWallet).claim(anotherWallet.address, claimedAmount)
+      launchpad.connect(ownerWallet).claim(anotherWallet.address, claimedAmount, true)
     ).to.changeTokenBalance(paymentToken, launchpad, payedAmount);
     totalClaimed = totalClaimed.add(claimedAmount);
     expect(await launchpad.claims(anotherWallet.address)).to.eq(claimedAmount);
     expect(await launchpad.totalClaimed()).to.eq(totalClaimed);
+    expect(await launchpad.splitReleases(anotherWallet.address)).to.eq(true);
   })
 
-  it('allows yetAnotherWallet to claim an allocation', async ()=>{
-    let claimedAmount = ethers.utils.parseUnits('1', 18);
+  it('allows yetAnotherWallet to claim an allocation that is not split upon release', async ()=>{
+    let claimedAmount = ethers.utils.parseUnits('110', 18);
     let payedAmount = claimedAmount.div(ethers.BigNumber.from((10**18).toString())).mul(price);
     await paymentToken.connect(ownerWallet).transfer(yetAnotherWallet.address, payedAmount);
     await paymentToken.connect(yetAnotherWallet).approve(launchpad.address, payedAmount);
     await expect(()=> 
-      launchpad.connect(yetAnotherWallet).claim(yetAnotherWallet.address, claimedAmount)
+      launchpad.connect(yetAnotherWallet).claim(yetAnotherWallet.address, claimedAmount, false)
     ).to.changeTokenBalance(paymentToken, launchpad, payedAmount);
     totalClaimed = totalClaimed.add(claimedAmount);
     expect(await launchpad.claims(yetAnotherWallet.address)).to.eq(claimedAmount);
     expect(await launchpad.totalClaimed()).to.eq(totalClaimed);
+    expect(await launchpad.splitReleases(yetAnotherWallet.address)).to.eq(false);
   })
 
   it('prevents people to claim more than is claimable', async ()=> {
@@ -218,7 +251,7 @@ describe('DePayLaunchpadV1', function() {
     await paymentToken.connect(ownerWallet).transfer(otherWallet.address, payedAmount);
     await paymentToken.connect(otherWallet).approve(launchpad.address, payedAmount);
     await expect(
-      launchpad.connect(otherWallet).claim(otherWallet.address, amountLaunched)
+      launchpad.connect(otherWallet).claim(otherWallet.address, amountLaunched, true)
     ).to.be.revertedWith(
       'Claiming attempt exceeds totalClaimable amount!'
     )
@@ -276,11 +309,13 @@ describe('DePayLaunchpadV1', function() {
     ).to.changeTokenBalance(launchedToken, ownerWallet, ethers.BigNumber.from('0'));
   })
 
-  it('allows to release launched token after launchpad ended to participants', async ()=> {
-    let totalClaimedAmount = ethers.utils.parseUnits('2', 18);
-    await expect(()=> 
-      launchpad.connect(otherWallet).release(otherWallet.address)
-    ).to.changeTokenBalance(launchedToken, otherWallet, totalClaimedAmount);
+  it('allows to release launched token after launchpad ended to participants and splitRelease to splitReleaseAddress', async ()=> {
+    let totalClaimedAmount = ethers.utils.parseUnits('210', 18);
+    await expect(async ()=>{ 
+      await expect(()=> {
+        launchpad.connect(otherWallet).release(otherWallet.address);
+      }).to.changeTokenBalance(launchedToken, otherWallet, totalClaimedAmount);
+    }).to.changeTokenBalance(launchedToken, splitReleaseWallet, splitReleaseAmount);
     expect(await launchpad.claims(otherWallet.address)).to.equal(ethers.BigNumber.from('0'));
   })
 
@@ -310,11 +345,13 @@ describe('DePayLaunchpadV1', function() {
   })
 
   it('allows to multiRelease to multiple addresses', async()=> {
-    await expect(async ()=>{
-      await expect(()=>{
-        launchpad.connect(otherWallet).multiRelease([anotherWallet.address, yetAnotherWallet.address])
-      }).to.changeTokenBalance(launchedToken, anotherWallet, ethers.utils.parseUnits('1', 18))
-    }).to.changeTokenBalance(launchedToken, yetAnotherWallet, ethers.utils.parseUnits('1', 18))
+    await expect(async ()=>{ 
+      await expect(async ()=>{
+        await expect(()=>{
+          launchpad.connect(otherWallet).multiRelease([anotherWallet.address, yetAnotherWallet.address])
+        }).to.changeTokenBalance(launchedToken, anotherWallet, ethers.utils.parseUnits('100', 18))
+      }).to.changeTokenBalance(launchedToken, yetAnotherWallet, ethers.utils.parseUnits('110', 18))
+    }).to.changeTokenBalance(launchedToken, splitReleaseWallet, splitReleaseAmount);
   })
 
   it('leaves the launchpad empty after the entire launch has been processed', async ()=>{

@@ -12,11 +12,11 @@ Binance Smart Chain Testnet: [0x7d75424e588434e05f8c3d666bb7da49b4d41b8c](https:
 
 ## Summary
 
-This Launchpad contract allows users to participate in a token launch.
+This launchpad smart contract allows users to participate in a token launch.
 
-The initiater (`owner`) deploys this contract, and sends the amount to be distributed with the launchpad into the launchpad contract.
+The initiator (`owner`) deploys this contract, and sends the token to be distributed with the launchpad into the launchpad contract.
 
-The `owner` then calls `init(_launchedToken:address, _paymentToken:address)` to initialize the launchpad.
+The `owner` then calls `init` to initialize the launchpad.
 
 The `totalClaimable` amount is determined by the balance of the `launchedToken` within the launchpad upon initialization.
 
@@ -24,11 +24,26 @@ Before the start of the claiming process, the `owner` has the ability to `whitel
 
 Those whitelisted addresses will be able to participate claiming tokens during the launch.
 
+Once the owner starts the launchpad using `start` and setting `endTime` and `price`, people can claim allocations using `claim`.
+
+Upon executing `claim`, people can also decide if they want to split released tokens with the `splitReleaseAddress` for other purposes.
+
+Once the launchpad has ended (`block.timestamp > endTime`), people with claims can release their share of the launched tokens by calling `release`.
+
+If a split release has been configured, released amounts of launched tokens will be deducted by the `splitReleaseAmount` which will be send to the `splitReleaseAddress`,
+the remaining claim of launched tokens will be send to the claiming address.
+
+If no split release has been configured the entire claimed amount will be send to the claimer upon `release`.
+
+After the launchpad ended, the initiator (`owner`) can `releasePayments` and `releaseUnclaimed` tokens which have not been claimed to finish the launchpad process.
+
 ## Functionalities
 
 ### `init`
 
 Initializes the launchpad with given `_launchedToken` and `_paymentToken`.
+
+Also allows you to setup release split if `_splitReleaseAddress` & `_splitReleaseAmount` is provided.
 
 Make sure you transfer the to be launched tokens into the launchpad contract before initialization.
 
@@ -39,6 +54,10 @@ Arguments:
 `_launchedToken`: The token to be launched.
 
 `_paymentToken`: The token accepted as payment.
+
+`_splitReleaseAmount`: Splits the release amount by the given amount and sends it upon release to `_splitReleaseAddress`.
+
+`_splitReleaseAddress`: Address used to send split release to.
 
 Example: https://testnet.bscscan.com/tx/0xb8800c88d99110e1ef932544d3aa3532f171fb6169368c9154f76ee5f5c44c22
 
@@ -100,13 +119,15 @@ Arguments:
 
 `amount`: The amount of launched tokens you are claiming.
 
+`splitRelease`: Boolean indicating if participant wants to split release with `splitReleaseAddress`.
+
 Example: https://testnet.bscscan.com/tx/0xd1f1a80c7be433980bbb83fc17a7eee9d64b6f000e54449a0b847beda3234f08
 
 ### `release`
 
 Release the previously claimed token.
 
-`launchedToken` will be send to the claimer (not the message sender) for the amount claimed.
+`launchedToken` will be send to the claimer (not the message sender) for the amount claimed, deducting `splitReleaseAmount` and send to `splitReleaseAddress` if configured as part of the claim.
 
 Arguments:
 

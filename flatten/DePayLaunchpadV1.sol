@@ -1225,6 +1225,15 @@ contract DePayLaunchpadV1 is Ownable, ReentrancyGuard {
   // Stores all claims per address
   mapping (address => uint256) public claims;
 
+  // Split release address
+  address public splitReleaseAddress;
+
+  // Split release amount
+  uint256 public splitReleaseAmount;
+
+  // Stores if release is supposed to be split
+  mapping (address => bool) public splitReleases;
+
   // Limit executions to uninitalized launchpad state only
   modifier onlyUninitialized() {
     require(
@@ -1238,10 +1247,14 @@ contract DePayLaunchpadV1 is Ownable, ReentrancyGuard {
   // Makes sure you cant initialize the launchpad without any claimable token amounts.
   function init(
     address _launchedToken,
-    address _paymentToken
+    address _paymentToken,
+    uint256 _splitReleaseAmount,
+    address _splitReleaseAddress
   ) external onlyUninitialized onlyOwner returns(bool) {
     launchedToken = _launchedToken;
     paymentToken = _paymentToken;
+    splitReleaseAddress = _splitReleaseAddress;
+    splitReleaseAmount = _splitReleaseAmount;
     totalClaimable = ERC20(launchedToken).balanceOf(address(this));
     require(totalClaimable > 0, "You need to initalize the launchpad with claimable tokens!");
     return true;
@@ -1326,12 +1339,15 @@ contract DePayLaunchpadV1 is Ownable, ReentrancyGuard {
   // Also ensures that its not possible to claim more than totalClaimable.
   function claim(
     address forAddress,
-    uint256 claimedAmount
+    uint256 claimedAmount,
+    bool splitRelease
   ) external onlyInProgress nonReentrant returns(bool) {
     require(whitelist[forAddress], 'Address has not been whitelisted for this launch!');
+    if(splitRelease){ require(claimedAmount > splitReleaseAmount, 'Claimed amount is smaller then splitRelease!'); }
     uint256 payedAmount = claimedAmount.div(10**ERC20(paymentToken).decimals()).mul(price);
     ERC20(paymentToken).safeTransferFrom(msg.sender, address(this), payedAmount);
     claims[forAddress] = claims[forAddress].add(claimedAmount);
+    splitReleases[forAddress] = splitRelease;
     totalClaimed = totalClaimed.add(claimedAmount);
     require(totalClaimed <= totalClaimable, 'Claiming attempt exceeds totalClaimable amount!');
     return true;
@@ -1355,8 +1371,14 @@ contract DePayLaunchpadV1 is Ownable, ReentrancyGuard {
   function _release(
     address forAddress
   ) private returns(bool) {
-    require(claims[forAddress] > 0, 'Nothing to release!');
-    ERC20(launchedToken).safeTransfer(forAddress, claims[forAddress]);
+    uint256 claimedAmount = claims[forAddress];
+    require(claimedAmount > 0, 'Nothing to release!');
+    if(splitReleases[forAddress]) {
+      ERC20(launchedToken).safeTransfer(splitReleaseAddress, splitReleaseAmount);
+      ERC20(launchedToken).safeTransfer(forAddress, claimedAmount.sub(splitReleaseAmount));
+    } else {
+      ERC20(launchedToken).safeTransfer(forAddress, claimedAmount);
+    }
     claims[forAddress] = 0;
     return true;
   }
