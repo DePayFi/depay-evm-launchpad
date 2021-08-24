@@ -1,0 +1,11 @@
+node_modules/
+build/
+artifacts/
+yarn-error.log
+cache/
+typechain/
+.env
+deployed.json
+coverage
+coverage.json
+test.json
