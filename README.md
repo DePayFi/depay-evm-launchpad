@@ -8,7 +8,7 @@ EVM Smart Contract to whitelist, claim and release tokens in a launchpad fashion
 
 Binance Smart Chain: [...](...)
 
-Binance Smart Chain Testnet: [0xbc3b9c0afac703ef2ef55ffb47fd5ca820024d87](https://testnet.bscscan.com/address/0xbc3b9c0afac703ef2ef55ffb47fd5ca820024d87)
+Binance Smart Chain Testnet: [0x1a9777d2a3bb52255bf71376d56575c0dbb35814](https://testnet.bscscan.com/address/0x1a9777d2a3bb52255bf71376d56575c0dbb35814)
 
 ## Summary
 
@@ -61,7 +61,7 @@ Arguments:
 
 `_splitReleaseAddress`: Address used to send split release to.
 
-Example: https://testnet.bscscan.com/tx/0x527e3ccf98204755df03d438cdc7ac4f002e073c45e6186fa2addaf0ba663545
+Example: https://testnet.bscscan.com/tx/0x88d85538d667c719f454b318ca67fdc9052a5c6e0d096495b6bce335609e057b
 
 ### `whitelistAddress`
 
@@ -75,7 +75,7 @@ Arguments:
 
 `status`: If whitelisted or not (e.g. true or false).
 
-Example: https://testnet.bscscan.com/tx/0xecc279591d947129d3ef3f00d7ed13d37a9228cadfe412f1be7340e35e7e0bd7
+Example: https://testnet.bscscan.com/tx/0x81db50cb8a8015709b4d9068b2b0b3f0050da37694b25b5b2c5dcd679e91c4e1
 
 ### `whitelistAddresses`
 
@@ -89,7 +89,7 @@ Arguments:
 
 `status`: If whitelisted or not (e.g. true or false).
 
-Example: https://testnet.bscscan.com/tx/0x9a0396a3d7758440a477a33265e900f677f4d7bc58422398adb301316d6df221
+Example: https://testnet.bscscan.com/tx/0x8c4bea12608260d18598de1bdd04c99d38d5fc68458814dc98e287f2bfffe656
 
 ### `start`
 
@@ -105,7 +105,7 @@ Arguments:
 
 `price`: Amount of `paymentToken` required to be paid per claimed `launchedToken`.
 
-Example: https://testnet.bscscan.com/tx/0xdaba6bc782004296c103ce0899433db6593f9ea46eef4ce9e9954b264dc11084
+Example: https://testnet.bscscan.com/tx/0x8362c2b316646dac5205ae9bf34081bc62a48ef916d9851269aff72d90baa443
 
 ### `claim`
 
@@ -123,7 +123,7 @@ Arguments:
 
 `splitRelease`: Boolean indicating if participant wants to split release with `splitReleaseAddress`.
 
-Example:
+Example: https://testnet.bscscan.com/tx/0xf23242ff1dbefc4bc4b0969305a4e45aba974df3810302aea35f5076e529e241
 
 ### `release`
 

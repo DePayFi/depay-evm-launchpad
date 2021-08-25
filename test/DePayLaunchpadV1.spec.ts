@@ -191,6 +191,18 @@ describe('DePayLaunchpadV1', function() {
     )
   })
 
+  it('requires people to claim more than splitReleaseAmount if they decide to split release', async ()=>{
+    let claimedAmount = ethers.utils.parseUnits('10', 18);
+    let payedAmount = claimedAmount.div(ethers.BigNumber.from((10**18).toString())).mul(price);
+    await paymentToken.connect(ownerWallet).transfer(otherWallet.address, payedAmount);
+    await paymentToken.connect(otherWallet).approve(launchpad.address, payedAmount);
+    await expect(
+      launchpad.connect(otherWallet).claim(otherWallet.address, claimedAmount, true)
+    ).to.be.revertedWith(
+      'Claimed amount is smaller then splitRelease!'
+    )
+  })
+
   it('allows people to claim an allocation if they have been whitelisted', async ()=>{
     let claimedAmount = ethers.utils.parseUnits('110', 18);
     let payedAmount = claimedAmount.div(ethers.BigNumber.from((10**18).toString())).mul(price);
@@ -201,6 +213,20 @@ describe('DePayLaunchpadV1', function() {
     ).to.changeTokenBalance(paymentToken, launchpad, payedAmount);
     totalClaimed = totalClaimed.add(claimedAmount);
     expect(await launchpad.claims(otherWallet.address)).to.eq(claimedAmount);
+    expect(await launchpad.totalClaimed()).to.eq(totalClaimed);
+    expect(await launchpad.splitReleases(otherWallet.address)).to.eq(true);
+  })
+
+  it('does not require people to claim more than splitReleaseAmount after their first initial contribution of splitReleaseAmount', async ()=>{
+    let claimedAmount = ethers.utils.parseUnits('10', 18);
+    let payedAmount = claimedAmount.div(ethers.BigNumber.from((10**18).toString())).mul(price);
+    await paymentToken.connect(ownerWallet).transfer(otherWallet.address, payedAmount);
+    await paymentToken.connect(otherWallet).approve(launchpad.address, payedAmount);
+    await expect(()=> 
+      launchpad.connect(otherWallet).claim(otherWallet.address, claimedAmount, true)
+    ).to.changeTokenBalance(paymentToken, launchpad, payedAmount);
+    totalClaimed = totalClaimed.add(claimedAmount);
+    expect(await launchpad.claims(otherWallet.address)).to.eq(ethers.utils.parseUnits('120', 18));
     expect(await launchpad.totalClaimed()).to.eq(totalClaimed);
     expect(await launchpad.splitReleases(otherWallet.address)).to.eq(true);
   })
@@ -226,7 +252,7 @@ describe('DePayLaunchpadV1', function() {
       launchpad.connect(otherWallet).claim(otherWallet.address, claimedAmount, true)
     ).to.changeTokenBalance(paymentToken, launchpad, payedAmount);
     totalClaimed = totalClaimed.add(claimedAmount);
-    expect(await launchpad.claims(otherWallet.address)).to.eq(claimedAmount.mul(ethers.BigNumber.from('2')));
+    expect(await launchpad.claims(otherWallet.address)).to.eq(ethers.utils.parseUnits('230', 18));
     expect(await launchpad.totalClaimed()).to.eq(totalClaimed);
     expect(await launchpad.splitReleases(otherWallet.address)).to.eq(true);
   })
@@ -322,7 +348,7 @@ describe('DePayLaunchpadV1', function() {
   })
 
   it('allows to release launched token after launchpad ended to participants and splitRelease to splitReleaseAddress', async ()=> {
-    let totalClaimedAmount = ethers.utils.parseUnits('210', 18);
+    let totalClaimedAmount = ethers.utils.parseUnits('230', 18).sub(ethers.utils.parseUnits('10', 18)); // sub split release
     await expect(async ()=>{ 
       await expect(()=> {
         launchpad.connect(otherWallet).release(otherWallet.address);
