@@ -205,6 +205,18 @@ describe('DePayLaunchpadV1', function() {
     expect(await launchpad.splitReleases(otherWallet.address)).to.eq(true);
   })
 
+  it('does not allow to change splitRelease for a claim once set', async ()=>{
+    let claimedAmount = ethers.utils.parseUnits('110', 18);
+    let payedAmount = claimedAmount.div(ethers.BigNumber.from((10**18).toString())).mul(price);
+    await paymentToken.connect(ownerWallet).transfer(otherWallet.address, payedAmount);
+    await paymentToken.connect(otherWallet).approve(launchpad.address, payedAmount);
+    await expect(
+      launchpad.connect(otherWallet).claim(otherWallet.address, claimedAmount, false)
+    ).to.be.revertedWith(
+      'You cannot change splitRelease once set!'
+    )
+  })
+
   it('just increases someones claim if you claim a second time', async ()=>{
     let claimedAmount = ethers.utils.parseUnits('110', 18);
     let payedAmount = claimedAmount.div(ethers.BigNumber.from((10**18).toString())).mul(price);

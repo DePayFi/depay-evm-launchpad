@@ -8,7 +8,7 @@ EVM Smart Contract to whitelist, claim and release tokens in a launchpad fashion
 
 Binance Smart Chain: [...](...)
 
-Binance Smart Chain Testnet: [0x7d75424e588434e05f8c3d666bb7da49b4d41b8c](https://testnet.bscscan.com/address/0x7d75424e588434e05f8c3d666bb7da49b4d41b8c)
+Binance Smart Chain Testnet: [0xbc3b9c0afac703ef2ef55ffb47fd5ca820024d87](https://testnet.bscscan.com/address/0xbc3b9c0afac703ef2ef55ffb47fd5ca820024d87)
 
 ## Summary
 
@@ -59,7 +59,7 @@ Arguments:
 
 `_splitReleaseAddress`: Address used to send split release to.
 
-Example: https://testnet.bscscan.com/tx/0xb8800c88d99110e1ef932544d3aa3532f171fb6169368c9154f76ee5f5c44c22
+Example: https://testnet.bscscan.com/tx/0x527e3ccf98204755df03d438cdc7ac4f002e073c45e6186fa2addaf0ba663545
 
 ### `whitelistAddress`
 
@@ -73,7 +73,7 @@ Arguments:
 
 `status`: If whitelisted or not (e.g. true or false).
 
-Example: https://testnet.bscscan.com/tx/0x2b9118f41d9a8895a7533673fb409d29c22f81ac5abc193d47038049fd3dee53
+Example: https://testnet.bscscan.com/tx/0xecc279591d947129d3ef3f00d7ed13d37a9228cadfe412f1be7340e35e7e0bd7
 
 ### `whitelistAddresses`
 
@@ -87,7 +87,7 @@ Arguments:
 
 `status`: If whitelisted or not (e.g. true or false).
 
-Example: https://testnet.bscscan.com/tx/0xc328ccbd04a83e5ad98214c17e24ed9556db3a2fc42edcddf0c019c341f52df8
+Example: https://testnet.bscscan.com/tx/0x9a0396a3d7758440a477a33265e900f677f4d7bc58422398adb301316d6df221
 
 ### `start`
 
@@ -103,7 +103,7 @@ Arguments:
 
 `price`: Amount of `paymentToken` required to be paid per claimed `launchedToken`.
 
-Example: https://testnet.bscscan.com/tx/0xd3d619d7432ae3e7d3b909abb8e23837725fa7277bd1e91f87cd5db8539fdbce
+Example: https://testnet.bscscan.com/tx/0xdaba6bc782004296c103ce0899433db6593f9ea46eef4ce9e9954b264dc11084
 
 ### `claim`
 
@@ -121,7 +121,7 @@ Arguments:
 
 `splitRelease`: Boolean indicating if participant wants to split release with `splitReleaseAddress`.
 
-Example: https://testnet.bscscan.com/tx/0xd1f1a80c7be433980bbb83fc17a7eee9d64b6f000e54449a0b847beda3234f08
+Example:
 
 ### `release`
 
