@@ -8,7 +8,7 @@ EVM Smart Contract to whitelist, claim and release tokens in a launchpad fashion
 
 Binance Smart Chain: [...](...)
 
-Binance Smart Chain Testnet: [0x1a9777d2a3bb52255bf71376d56575c0dbb35814](https://testnet.bscscan.com/address/0x1a9777d2a3bb52255bf71376d56575c0dbb35814)
+Binance Smart Chain Testnet: [0x012af92a2a1274566256dbc756f708e8c70d983d](https://testnet.bscscan.com/address/0x012af92a2a1274566256dbc756f708e8c70d983d)
 
 ## Summary
 
@@ -61,7 +61,7 @@ Arguments:
 
 `_splitReleaseAddress`: Address used to send split release to.
 
-Example: https://testnet.bscscan.com/tx/0x88d85538d667c719f454b318ca67fdc9052a5c6e0d096495b6bce335609e057b
+Example: https://testnet.bscscan.com/tx/0xb197355a7d2495c29357d20472aa3573a0f5563e5cea3dffd1ecf02820ea44bf
 
 ### `whitelistAddress`
 
@@ -75,7 +75,7 @@ Arguments:
 
 `status`: If whitelisted or not (e.g. true or false).
 
-Example: https://testnet.bscscan.com/tx/0x81db50cb8a8015709b4d9068b2b0b3f0050da37694b25b5b2c5dcd679e91c4e1
+Example: https://testnet.bscscan.com/tx/0xc27ba361cbdeace5b4aa5501d666ca689a22685e6d5846e2063ca5284037356d
 
 ### `whitelistAddresses`
 
@@ -89,7 +89,7 @@ Arguments:
 
 `status`: If whitelisted or not (e.g. true or false).
 
-Example: https://testnet.bscscan.com/tx/0x8c4bea12608260d18598de1bdd04c99d38d5fc68458814dc98e287f2bfffe656
+Example: https://testnet.bscscan.com/tx/0xc99816adc321b6106277d31c37987bb7daf1c035615ed2b4834c9157e34cc9f6
 
 ### `start`
 
@@ -105,7 +105,7 @@ Arguments:
 
 `price`: Amount of `paymentToken` required to be paid per claimed `launchedToken`.
 
-Example: https://testnet.bscscan.com/tx/0x8362c2b316646dac5205ae9bf34081bc62a48ef916d9851269aff72d90baa443
+Example: https://testnet.bscscan.com/tx/0xaad62394d2b83c593538c3304a1c99dbb47e9128d7420612072e81735a2112df
 
 ### `claim`
 
@@ -123,7 +123,7 @@ Arguments:
 
 `splitRelease`: Boolean indicating if participant wants to split release with `splitReleaseAddress`.
 
-Example: https://testnet.bscscan.com/tx/0xf23242ff1dbefc4bc4b0969305a4e45aba974df3810302aea35f5076e529e241
+Example: https://testnet.bscscan.com/tx/0xd287fe3909ad26fcc9156afb51fb2138f53045571fde48d257629f14497fcfe0
 
 ### `release`
 
@@ -135,7 +135,7 @@ Arguments:
 
 `forAddress`: The address to release the launchedToken for.
 
-Example: https://testnet.bscscan.com/tx/0xa9c4e313df34cb7d48275078779bfc2ba12b429ced1bc53d45892f2ae84a2541
+Example: https://testnet.bscscan.com/tx/0xe5d4d248c5d53c1fc2ec1dac39b8bacac21e19582fd78e55790b26c381199aba
 
 ### `multiRelease`
 
@@ -147,19 +147,19 @@ Arguments:
 
 `forAddresses`: The addresses to release the launchedToken for.
 
-Example: https://testnet.bscscan.com/tx/0xb522320740fb7001fcdc257b3022e575e30199cf6d943345c811bfb330cffb96
+Example: https://testnet.bscscan.com/tx/0xb907e79fbf1abfcaf15a29378c3b403ed2082dcd6f552eeac851aaae358bd51e
 
 ### `releasePayments`
 
 Releases all payments made with `paymentToken` for a token launch allocation back to the `owner`.
 
-Example: https://testnet.bscscan.com/tx/0x612306065d10040fe4437acfda07d4cbd198b5679bdc86d5f3b975131023c1b2
+Example: https://testnet.bscscan.com/tx/0xbacbc16df2d0ed392ebc6f1b780a1c7d15ca6c6fa8b24e2a5ebb21355be263fc
 
 ### `releaseUnclaimed`
 
 Releases all unclaimed tokens back to the `owner`.
 
-Example: https://testnet.bscscan.com/tx/0x55513a020ca5e8ce16c829768f53814c93551ad1798f73b62da30e87de802d71
+Example: https://testnet.bscscan.com/tx/0x997a2ff2b35def9c0bf6f3b1aaf2bb4e81bcccc3a862a1576678cc0f27af0da5
 
 ## Audits
 
