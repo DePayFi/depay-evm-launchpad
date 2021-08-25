@@ -28,6 +28,8 @@ Once the owner starts the launchpad using `start` and setting `endTime` and `pri
 
 Upon executing `claim`, people can also decide if they want to split released tokens with the `splitReleaseAddress` for other purposes.
 
+Once an individual claim for an address has been set to split release, it cannot be reverted (as the to be split amount also has been payed in already).
+
 Once the launchpad has ended (`block.timestamp > endTime`), people with claims can release their share of the launched tokens by calling `release`.
 
 If a split release has been configured, released amounts of launched tokens will be deducted by the `splitReleaseAmount` which will be send to the `splitReleaseAddress`,
