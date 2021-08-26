@@ -1,90 +1,83 @@
-#  Audit report
-  
-  
+# Audit report
+
 |    Name    | Information                                                                                                       |
 | :--------: | ----------------------------------------------------------------------------------------------------------------- |
 | Repository | https://github.com/DePayFi/depay-evm-launchpad                                                                    |
-|  Checked   | [DePayLaunchpadV1.sol](https://github.com/DePayFi/depay-evm-launchpad/blob/master/contracts/DePayLaunchpadV1.sol ) |
-|   Branch   | [master](https://github.com/DePayFi/depay-evm-launchpad )                                                          |
+|  Checked   | [DePayLaunchpadV1.sol](https://github.com/DePayFi/depay-evm-launchpad/blob/master/contracts/DePayLaunchpadV1.sol) |
+|   Branch   | [master](https://github.com/DePayFi/depay-evm-launchpad)                                                          |
 |    Time    | Thur, 26 Aug 2021 06:00:35 UTC                                                                                    |
 |   Author   | Temitayo Daniel                                                                                                   |
-  
-#  Result
-  
-  
-| Severity | Count | Link                                             |
-| :------: | ----: | ------------------------------------------------ |
-|   High   |     2 |                                                  |
-|          |       | [H01- Return value ignored](#H01 )                |
-|          |       | [H02- Return value ignored](#H02 )                |
-|  Medium  |     0 |                                                  |
-|   Low    |     3 |                                                  |
-|          |       | [L01 - Duplicate function names](#L01 )           |
-|          |       | [L02 - Inconsistent variable type](#L02 )         |
-|          |       | [L03 - Lack of comments on most functions](#L03 ) |
-|  Notes   |     1 |                                                  |
-|          |       | [N01 - Consider using address(0)](#N01 )          |
-  
-##  L01 - Duplicate function names
-  
-  
-|          Affected           | Severity | Count |                                                                                                                                                                  Lines |
-| :-------------------------: | :------- | ----: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| DePayPaymentProcessorV1.sol | Low      |     1 | [68-75](https://github.com/DePayFi/depay-ethereum-payment-processing/blob/dc5204fb96f9b0f53d733fb89e91e856c1db1dbb/contracts/DePayPaymentProcessorV1.sol#L68l#L68-L75 ) |
-  
-There are two private functions that share the same name `_ensureBalance`, It is advised to change one of them so as to avoid confusion especially when using them in other functions.
-  
+
+# Result
+
+| Severity | Count | Link                                                |
+| :------: | ----: | --------------------------------------------------- |
+|   High   |     0 |                                                     |  |
+|  Medium  |     0 |                                                     |
+|   Low    |     2 |                                                     |
+|          |       | [L01 - Emit an event for parameter changes](#L01)   |
+|          |       | [L02 - Lack of Zero Check](#L02)                    |
+|  Notes   |     2 |                                                     |
+|          |       | [N01 - Use a lower solidity version compiler](#N01) |
+|          |       | [N01 - Remove redundant checks](#N01)               |
+
+<a name="L01"/>
+
+## L01 - Emit an event for parameter changes
+
+|       Affected       | Severity | Count |                                                                                                                                        Lines |
+| :------------------: | :------- | ----: | -------------------------------------------------------------------------------------------------------------------------------------------: |
+| DePayLaunchpadV1.sol | Low      |     5 | [66-70](https://github.com/DePayFi/depay-evm-launchpad/blob/5c3288f1b9cc1273b8cef2b064c017b162165b19/contracts/DePayLaunchpadV1.sol#L66-L70) |
+|                      |          |     2 | [97-98](https://github.com/DePayFi/depay-evm-launchpad/blob/5c3288f1b9cc1273b8cef2b064c017b162165b19/contracts/DePayLaunchpadV1.sol#L97-L98) |
+
+When state variables are being modified, it is important to emit events that alert the state of change of these critical transitions. a simple fix would be to have some events that emit the updated value of state variables that were modified in the functions [`init`](https://github.com/DePayFi/depay-evm-launchpad/blob/5c3288f1b9cc1273b8cef2b064c017b162165b19/contracts/DePayLaunchpadV1.sol#L60) and [`start`](https://github.com/DePayFi/depay-evm-launchpad/blob/5c3288f1b9cc1273b8cef2b064c017b162165b19/contracts/DePayLaunchpadV1.sol#L96)
+
+<a name="L02"/>
+
+## L02 - Lack of Zero Check
+
+|       Affected       | Severity | Count |                                                                                                                                        Lines |
+| :------------------: | :------- | ----: | -------------------------------------------------------------------------------------------------------------------------------------------: |
+| DePayLaunchpadV1.sol | Low      |     1 | [61-64](https://github.com/DePayFi/depay-evm-launchpad/blob/5c3288f1b9cc1273b8cef2b064c017b162165b19/contracts/DePayLaunchpadV1.sol#L61-L64) |
+
+When important operation is to be carried out on an arbitrary address, it is important to check that it is not the Zero address. This applies to variables [`_launchedToken`](https://github.com/DePayFi/depay-evm-launchpad/blob/5c3288f1b9cc1273b8cef2b064c017b162165b19/contracts/DePayLaunchpadV1.sol#L61),[`_paymentToken`](https://github.com/DePayFi/depay-evm-launchpad/blob/5c3288f1b9cc1273b8cef2b064c017b162165b19/contracts/DePayLaunchpadV1.sol#L62) and [`splitReleaseAddress`](https://github.com/DePayFi/depay-evm-launchpad/blob/5c3288f1b9cc1273b8cef2b064c017b162165b19/contracts/DePayLaunchpadV1.sol#L64) and can be easily mitigated by doing
+
 ```solidity
- function _ensureBalance(address tokenOut, uint balanceBefore) private {
-    require(_balance(tokenOut) >= balanceBefore, 'DePay: Insufficient balance after payment!');
-  }
+require(addressVariable!=address(0),"Zero Address: Not Allowed");
 ```
-  
-```solidity
- function _ensureBalance(address[] calldata path) private returns (uint balance) {
-    balance = _balance(path[path.length-1]);
-    if(path[path.length-1] == ZERO) { balance -= msg.value; }
-  }
-```
-  
-<a name="L0"/>
-  
-##  L02 - Inconsistent variable types
-  
-  
-| Affected                         | Severity | Count |                                                                                                                                                               Lines |
-| :------------------------------- | :------- | ----: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| DePayPaymentProcessorV1.sol      | Low      |     1 | [14](https://github.com/DePayFi/depay-ethereum-payment-processing/blob/dc5204fb96f9b0f53d733fb89e91e856c1db1dbb/contracts/DePayPaymentProcessorV1Uniswap01.sol#L14 ) |
-| DePayPaymentProcessorV1Uniswap01 | Low      |     1 | [29](https://github.com/DePayFi/depay-ethereum-payment-processing/blob/dc5204fb96f9b0f53d733fb89e91e856c1db1dbb/contracts/DePayPaymentProcessorV1Uniswap01.sol#L29 ) |
-| DePayPaymentProcessorV1Uniswap01 | Low      |     1 | [30](https://github.com/DePayFi/depay-ethereum-payment-processing/blob/dc5204fb96f9b0f53d733fb89e91e856c1db1dbb/contracts/DePayPaymentProcessorV1Uniswap01.sol#L30 ) |
-| DePayPaymentProcessorV1Uniswap01 | Low      |     1 | [31](https://github.com/DePayFi/depay-ethereum-payment-processing/blob/dc5204fb96f9b0f53d733fb89e91e856c1db1dbb/contracts/DePayPaymentProcessorV1Uniswap01.sol#L31 ) |
-| DePayPaymentProcessorV1Uniswap01 | Low      |     1 | [42](https://github.com/DePayFi/depay-ethereum-payment-processing/blob/dc5204fb96f9b0f53d733fb89e91e856c1db1dbb/contracts/DePayPaymentProcessorV1Uniswap01.sol#L42 ) |
-  
-Defined [here](https://github.com/DePayFi/depay-ethereum-payment-processing/blob/dc5204fb96f9b0f53d733fb89e91e856c1db1dbb/contracts/DePayPaymentProcessorV1.sol#L12 ) in `DePayPaymentProcessorV1`
-  
-Variable type `uint256` was used in the underlying contract library [TransferHelper](https://github.com/DePayFi/depay-ethereum-payment-processing/blob/master/contracts/libraries/TransferHelper.sol ) while `uint` is used in both [DePayPaymentProcessorV1Uniswap01](https://github.com/DePayFi/depay-ethereum-payment-processing/blob/master/contracts/DePayPaymentProcessorV1Uniswap01.sol ) and [DePayPaymentProcessorV1](https://github.com/DePayFi/depay-evm-launchpad/blob/master/contracts/DePayLaunchpadV1.sol ). Note that `uint` and `uint256` may have the same byte space allocation but it is advised to use a consistent variable naming strategy throughout a codebase so as to improve readability and maintainability.
-  
-<a name="L03"/>
-  
-##  L03 - Lack of comments on most functions
-  
-  
-| Affected                  | Severity | Count |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          Lines |
-| :------------------------ | :------- | ----: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| DePayLiquidityStaking.sol | Low      |     7 | [34](https://github.com/DePayFi/depay-ethereum-payment-processing/blob/dc5204fb96f9b0f53d733fb89e91e856c1db1dbb/contracts/DePayPaymentProcessorV1.sol#L34 ), [55](https://github.com/DePayFi/depay-ethereum-payment-processing/blob/dc5204fb96f9b0f53d733fb89e91e856c1db1dbb/contracts/DePayPaymentProcessorV1.sol#L55 ), [60](https://github.com/DePayFi/depay-ethereum-payment-processing/blob/dc5204fb96f9b0f53d733fb89e91e856c1db1dbb/contracts/DePayPaymentProcessorV1.sol#L60 ), [68](https://github.com/DePayFi/depay-ethereum-payment-processing/blob/dc5204fb96f9b0f53d733fb89e91e856c1db1dbb/contracts/DePayPaymentProcessorV1.sol#L68 ), [77](https://github.com/DePayFi/depay-ethereum-payment-processing/blob/dc5204fb96f9b0f53d733fb89e91e856c1db1dbb/contracts/DePayPaymentProcessorV1.sol#L77 ), [85](https://github.com/DePayFi/depay-ethereum-payment-processing/blob/dc5204fb96f9b0f53d733fb89e91e856c1db1dbb/contracts/DePayPaymentProcessorV1.sol#L85 ), [93](https://github.com/DePayFi/depay-ethereum-payment-processing/blob/dc5204fb96f9b0f53d733fb89e91e856c1db1dbb/contracts/DePayPaymentProcessorV1.sol#L93 ), [98](https://github.com/DePayFi/depay-ethereum-payment-processing/blob/dc5204fb96f9b0f53d733fb89e91e856c1db1dbb/contracts/DePayPaymentProcessorV1.sol#L98 ) |
-  
-Most of these internal functions in `DePayPaymentProcessorV1` require a lot of explanation which can be done in comments, especially core external functions like [pay](https://github.com/DePayFi/depay-ethereum-payment-processing/blob/dc5204fb96f9b0f53d733fb89e91e856c1db1dbb/contracts/DePayPaymentProcessorV1Uniswap01.sol#L27 ) in `DePayPaymentProcessorV1Uniswap01` .
-Consider adding comments that do a thorough explanation on how these functions use their arguments and the values they return
-  
+
 <a name="N01"/>
-  
-##  N01 - Consider using address(0)
-  
-  
+
+## N01 - Use a lower solidity version compiler
+
+|       Affected       | Severity | Count |                                                                                                                               Lines |
+| :------------------: | :------- | ----: | ----------------------------------------------------------------------------------------------------------------------------------: |
+| DePayLaunchpadV1.sol | Notes    |     1 | [3](https://github.com/DePayFi/depay-evm-launchpad/blob/5c3288f1b9cc1273b8cef2b064c017b162165b19/contracts/DePayLaunchpadV1.sol#L3) |
+
+[`solc-0.8.6`](https://github.com/DePayFi/depay-evm-launchpad/blob/5c3288f1b9cc1273b8cef2b064c017b162165b19/contracts/DePayLaunchpadV1.sol#L3) is not recommended for deployment as it is still new and might contain some bugs
+
+Consider deploying with `0.8.1`
+
+<a name="N02"/>
+
+## N02 - Remove redundant checks
+
+|       Affected       | Severity | Count |                                                                                                                                            Lines |
+| :------------------: | :------- | ----: | -----------------------------------------------------------------------------------------------------------------------------------------------: |
+| DePayLaunchpadV1.sol | Notes    |     1 | [157-158](https://github.com/DePayFi/depay-evm-launchpad/blob/5c3288f1b9cc1273b8cef2b064c017b162165b19/contracts/DePayLaunchpadV1.sol#L157-L158) |
+
+There is a Comparison to boolean constant that is been done in lines [157](https://github.com/DePayFi/depay-evm-launchpad/blob/5c3288f1b9cc1273b8cef2b064c017b162165b19/contracts/DePayLaunchpadV1.sol#L157) and [158](https://github.com/DePayFi/depay-evm-launchpad/blob/5c3288f1b9cc1273b8cef2b064c017b162165b19/contracts/DePayLaunchpadV1.sol#L158). Recommendation would be to remove the equality to the boolean constant.
+
+_Before_
+
 ```solidity
-  // Address ZERO
-  address private ZERO = 0x0000000000000000000000000000000000000000;
+if(splitRelease && splitReleases[forAddress] == false){ require(claimedAmount > splitReleaseAmount, 'Claimed amount is smaller then splitRelease!'); }
+    if(splitRelease == false){ require(splitReleases[forAddress] == false, 'You cannot change splitRelease once set!'); }
 ```
-  
-To improve readability and also preserve some storage, consider using `address(0)`
-  
+
+_After_
+
+```solidity
+if(splitRelease && !splitReleases[forAddress]){ require(claimedAmount > splitReleaseAmount, 'Claimed amount is smaller then splitRelease!'); }
+    if(!splitRelease){ require(!splitReleases[forAddress], 'You cannot change splitRelease once set!'); }
+```
