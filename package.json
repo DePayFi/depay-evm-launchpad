@@ -1,22 +1,17 @@
 {
-  "name": "@depay/depay-evm-router",
-  "description": "DePay's EVM Router. A set of smart contracts simplifying decentralized payment routing.",
-  "version": "1.2.0",
+  "name": "@depay/depay-evm-launchpad",
+  "description": "DePay's token launchpad contract.",
+  "version": "1.0.0",
   "homepage": "https://depay.fi",
   "repository": {
     "type": "git",
-    "url": "https://github.com/depayfi/depay-evm-router"
+    "url": "https://github.com/depayfi/depay-evm-launchpad"
   },
   "keywords": [
-    "depay",
     "evm",
-    "smart contract",
-    "payments",
-    "swapping",
-    "sales",
-    "router",
-    "decentralized",
-    "defi"
+    "token",
+    "launchpad",
+    "smart contract"
   ],
   "files": [
     "contracts",
