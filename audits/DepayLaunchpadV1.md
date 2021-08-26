@@ -14,7 +14,7 @@
 | :------: | ----: | --------------------------------------------------- |
 |   High   |     0 |                                                     |  |
 |  Medium  |     0 |                                                     |
-|   Low    |     3 |                                                     |
+|   Low    |     2 |                                                     |
 |          |       | [L01 - Emit an event for parameter changes](#L01)   |
 |          |       | [L02 - Lack of Zero Check](#L02)                    |
 |  Notes   |     2 |                                                     |
