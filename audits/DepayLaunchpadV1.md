@@ -17,7 +17,6 @@
 |   Low    |     3 |                                                     |
 |          |       | [L01 - Emit an event for parameter changes](#L01)   |
 |          |       | [L02 - Lack of Zero Check](#L02)                    |
-|          |       | [L03 - Lack of comments on most functions](#L03)    |
 |  Notes   |     2 |                                                     |
 |          |       | [N01 - Use a lower solidity version compiler](#N01) |
 |          |       | [N01 - Remove redundant checks](#N01)               |
