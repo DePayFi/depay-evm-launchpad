@@ -161,7 +161,7 @@ contract DePayLaunchpadV1 is Ownable, ReentrancyGuard {
     require(whitelist[forAddress], 'Address has not been whitelisted for this launch!');
     if(splitRelease && !splitReleases[forAddress]){ require(claimedAmount > splitReleaseAmount, 'Claimed amount is smaller then splitRelease!'); }
     if(!splitRelease){ require(!splitReleases[forAddress], 'You cannot change splitRelease once set!'); }
-    uint256 payedAmount = claimedAmount.div(10**ERC20(paymentToken).decimals()).mul(price);
+    uint256 payedAmount = claimedAmount.mul(price).div(10**ERC20(paymentToken).decimals());
     ERC20(paymentToken).safeTransferFrom(msg.sender, address(this), payedAmount);
     claims[forAddress] = claims[forAddress].add(claimedAmount);
     splitReleases[forAddress] = splitRelease;
