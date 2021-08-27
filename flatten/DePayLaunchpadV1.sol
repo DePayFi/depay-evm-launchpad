@@ -1251,6 +1251,9 @@ contract DePayLaunchpadV1 is Ownable, ReentrancyGuard {
     uint256 _splitReleaseAmount,
     address _splitReleaseAddress
   ) external onlyUninitialized onlyOwner returns(bool) {
+    require(_launchedToken != address(0), "Zero Address: Not Allowed");
+    require(_paymentToken != address(0), "Zero Address: Not Allowed");
+    require(_splitReleaseAddress != address(0), "Zero Address: Not Allowed");
     launchedToken = _launchedToken;
     paymentToken = _paymentToken;
     splitReleaseAddress = _splitReleaseAddress;
@@ -1297,6 +1300,7 @@ contract DePayLaunchpadV1 is Ownable, ReentrancyGuard {
     address _address,
     bool status
   ) private returns(bool) {
+    require(_address != address(0), "Zero Address: Not Allowed");
     whitelist[_address] = status;
     return true;
   }
