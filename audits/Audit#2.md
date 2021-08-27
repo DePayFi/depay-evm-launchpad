@@ -17,9 +17,11 @@
 |   Low    |     2 |                                                     |
 |          |       | [L01 - Emit an event for parameter changes](#L01)   |
 |          |       | [L02 - Lack of Zero Check](#L02)                    |
-|  Notes   |     2 |                                                     |
+|  Notes   |     4 |                                                     |
 |          |       | [N01 - Use a lower solidity version compiler](#N01) |
-|          |       | [N01 - Remove redundant checks](#N01)               |
+|          |       | [N02 - Remove redundant checks](#N02)               |
+|          |       | [N03 - Perform division after multiplications](#N03)|
+|          |       | [N04 - Use safeTransfer over transfer](#N04)        |
 
 <a name="L01"/>
 
