@@ -2,7 +2,7 @@
 
 // only used for running automated hardhat tests
 
-pragma solidity >=0.8.6 <0.9.0;
+pragma solidity ^0.8.1;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
