@@ -1188,7 +1188,7 @@ library SafeMath {
 // Root file: contracts/DePayLaunchpadV1.sol
 
 
-pragma solidity >=0.8.6 <0.9.0;
+pragma solidity ^0.8.1;
 
 // import "@openzeppelin/contracts/access/Ownable.sol";
 // import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
@@ -1251,6 +1251,9 @@ contract DePayLaunchpadV1 is Ownable, ReentrancyGuard {
     uint256 _splitReleaseAmount,
     address _splitReleaseAddress
   ) external onlyUninitialized onlyOwner returns(bool) {
+    require(_launchedToken != address(0), "Zero Address: Not Allowed");
+    require(_paymentToken != address(0), "Zero Address: Not Allowed");
+    require(_splitReleaseAddress != address(0), "Zero Address: Not Allowed");
     launchedToken = _launchedToken;
     paymentToken = _paymentToken;
     splitReleaseAddress = _splitReleaseAddress;
@@ -1297,6 +1300,7 @@ contract DePayLaunchpadV1 is Ownable, ReentrancyGuard {
     address _address,
     bool status
   ) private returns(bool) {
+    require(_address != address(0), "Zero Address: Not Allowed");
     whitelist[_address] = status;
     return true;
   }
@@ -1343,9 +1347,9 @@ contract DePayLaunchpadV1 is Ownable, ReentrancyGuard {
     bool splitRelease
   ) external onlyInProgress nonReentrant returns(bool) {
     require(whitelist[forAddress], 'Address has not been whitelisted for this launch!');
-    if(splitRelease && splitReleases[forAddress] == false){ require(claimedAmount > splitReleaseAmount, 'Claimed amount is smaller then splitRelease!'); }
-    if(splitRelease == false){ require(splitReleases[forAddress] == false, 'You cannot change splitRelease once set!'); }
-    uint256 payedAmount = claimedAmount.div(10**ERC20(paymentToken).decimals()).mul(price);
+    if(splitRelease && !splitReleases[forAddress]){ require(claimedAmount > splitReleaseAmount, 'Claimed amount is smaller then splitRelease!'); }
+    if(!splitRelease){ require(!splitReleases[forAddress], 'You cannot change splitRelease once set!'); }
+    uint256 payedAmount = claimedAmount.mul(price).div(10**ERC20(paymentToken).decimals());
     ERC20(paymentToken).safeTransferFrom(msg.sender, address(this), payedAmount);
     claims[forAddress] = claims[forAddress].add(claimedAmount);
     splitReleases[forAddress] = splitRelease;
@@ -1404,14 +1408,14 @@ contract DePayLaunchpadV1 is Ownable, ReentrancyGuard {
 
   // Releases payment token to the owner.
   function releasePayments() external onlyEnded onlyOwner nonReentrant returns(bool) {
-    ERC20(paymentToken).transfer(owner(), ERC20(paymentToken).balanceOf(address(this)));
+    ERC20(paymentToken).safeTransfer(owner(), ERC20(paymentToken).balanceOf(address(this)));
     return true;
   }
 
   // Releases unclaimed launched tokens back to the owner.
   function releaseUnclaimed() external onlyEnded onlyOwner nonReentrant returns(bool) {
     uint256 unclaimed = totalClaimable-totalClaimed;
-    ERC20(launchedToken).transfer(owner(), unclaimed);
+    ERC20(launchedToken).safeTransfer(owner(), unclaimed);
     totalClaimable = totalClaimable.sub(unclaimed);
     return true;
   }

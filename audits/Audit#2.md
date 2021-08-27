@@ -17,9 +17,11 @@
 |   Low    |     2 |                                                     |
 |          |       | [L01 - Emit an event for parameter changes](#L01)   |
 |          |       | [L02 - Lack of Zero Check](#L02)                    |
-|  Notes   |     2 |                                                     |
+|  Notes   |     4 |                                                     |
 |          |       | [N01 - Use a lower solidity version compiler](#N01) |
-|          |       | [N01 - Remove redundant checks](#N01)               |
+|          |       | [N02 - Remove redundant checks](#N02)               |
+|          |       | [N03 - Perform division after multiplications](#N03)|
+|          |       | [N04 - Use safeTransfer over transfer](#N04)        |
 
 <a name="L01"/>
 
@@ -80,4 +82,48 @@ _After_
 ```solidity
 if(splitRelease && !splitReleases[forAddress]){ require(claimedAmount > splitReleaseAmount, 'Claimed amount is smaller then splitRelease!'); }
     if(!splitRelease){ require(!splitReleases[forAddress], 'You cannot change splitRelease once set!'); }
+```
+
+<a name="N03"/>
+
+## N03 - Perform division after multiplication
+
+|       Affected       | Severity | Count |                                                                                                                                            Lines |
+| :------------------: | :------- | ----: | -----------------------------------------------------------------------------------------------------------------------------------------------: |
+| DePayLaunchpadV1.sol | Notes    |     1 | [160](https://github.com/DePayFi/depay-evm-launchpad/blob/5c3288f1b9cc1273b8cef2b064c017b162165b19/contracts/DePayLaunchpadV1.sol#L160) |
+
+Although by default Division is supposed to come before multiplication, but since solidity doesn't support float, be careful when doing division before multiplications.
+
+_Before_
+
+```solidity
+uint256 payedAmount = claimedAmount.div(10**ERC20(paymentToken).decimals()).mul(price);
+```
+
+_After_
+
+```solidity
+uint256 payedAmount = claimedAmount.mul(price).div(10**ERC20(paymentToken).decimals());
+```
+
+<a name="N04"/>
+
+## N04 - Use safeTransfer over transfer
+
+|       Affected       | Severity | Count |                                                                                                                                            Lines |
+| :------------------: | :------- | ----: | -----------------------------------------------------------------------------------------------------------------------------------------------: |
+| DePayLaunchpadV1.sol | Notes    |     1 | [219](https://github.com/DePayFi/depay-evm-launchpad/blob/5c3288f1b9cc1273b8cef2b064c017b162165b19/contracts/DePayLaunchpadV1.sol#L219) |
+
+Make sure to use safeTransfer over transfer.
+
+_Before_
+
+```solidity
+ERC20(paymentToken).transfer(owner(), ERC20(paymentToken).balanceOf(address(this)));
+```
+
+_After_
+
+```solidity
+ERC20(paymentToken).safeTransfer(owner(), ERC20(paymentToken).balanceOf(address(this)));
 ```

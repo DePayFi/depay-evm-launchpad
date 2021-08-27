@@ -5,7 +5,7 @@ import { HardhatUserConfig } from 'hardhat/types'
 
 export default {
   solidity: {
-    version: '0.8.6',
+    version: '0.8.1',
     settings: {
       optimizer: {
         enabled: true,
