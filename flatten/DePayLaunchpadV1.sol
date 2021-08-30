@@ -1185,7 +1185,7 @@ contract DePayLaunchpadV1 is Ownable, ReentrancyGuard {
   function releaseUnclaimed() external onlyEnded onlyOwner nonReentrant returns(bool) {
     uint256 unclaimed = totalClaimable-totalClaimed;
     ERC20(launchedToken).safeTransfer(owner(), unclaimed);
-    totalClaimable -= unclaimed;
+    totalClaimable = 0;
     return true;
   }
 }
