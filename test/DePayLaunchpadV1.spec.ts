@@ -342,9 +342,11 @@ describe('DePayLaunchpadV1', function() {
 
   it('sends nothing if trying to release unclaimed tokens a second time', async()=>{
     let unclaimedAmount = (await launchpad.totalClaimable()).sub(await launchpad.totalClaimed());
-    await expect(()=>
+    await expect(
       launchpad.connect(ownerWallet).releaseUnclaimed()
-    ).to.changeTokenBalance(launchedToken, ownerWallet, ethers.BigNumber.from('0'));
+    ).to.be.revertedWith(
+      'reverted with panic code 0x11'
+    )
   })
 
   it('allows to release launched token after launchpad ended to participants and splitRelease to splitReleaseAddress', async ()=> {

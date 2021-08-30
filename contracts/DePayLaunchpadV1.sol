@@ -6,11 +6,9 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 contract DePayLaunchpadV1 is Ownable, ReentrancyGuard {
   
-  using SafeMath for uint;
   using SafeERC20 for ERC20;
 
   // The address of the token to be launched
@@ -161,11 +159,11 @@ contract DePayLaunchpadV1 is Ownable, ReentrancyGuard {
     require(whitelist[forAddress], 'Address has not been whitelisted for this launch!');
     if(splitRelease && !splitReleases[forAddress]){ require(claimedAmount > splitReleaseAmount, 'Claimed amount is smaller then splitRelease!'); }
     if(!splitRelease){ require(!splitReleases[forAddress], 'You cannot change splitRelease once set!'); }
-    uint256 payedAmount = claimedAmount.mul(price).div(10**ERC20(paymentToken).decimals());
+    uint256 payedAmount = claimedAmount * price / (10**ERC20(paymentToken).decimals());
     ERC20(paymentToken).safeTransferFrom(msg.sender, address(this), payedAmount);
-    claims[forAddress] = claims[forAddress].add(claimedAmount);
+    claims[forAddress] += claimedAmount;
     splitReleases[forAddress] = splitRelease;
-    totalClaimed = totalClaimed.add(claimedAmount);
+    totalClaimed += claimedAmount;
     require(totalClaimed <= totalClaimable, 'Claiming attempt exceeds totalClaimable amount!');
     return true;
   }
@@ -192,7 +190,7 @@ contract DePayLaunchpadV1 is Ownable, ReentrancyGuard {
     require(claimedAmount > 0, 'Nothing to release!');
     if(splitReleases[forAddress]) {
       ERC20(launchedToken).safeTransfer(splitReleaseAddress, splitReleaseAmount);
-      ERC20(launchedToken).safeTransfer(forAddress, claimedAmount.sub(splitReleaseAmount));
+      ERC20(launchedToken).safeTransfer(forAddress, (claimedAmount - splitReleaseAmount));
     } else {
       ERC20(launchedToken).safeTransfer(forAddress, claimedAmount);
     }
@@ -228,7 +226,7 @@ contract DePayLaunchpadV1 is Ownable, ReentrancyGuard {
   function releaseUnclaimed() external onlyEnded onlyOwner nonReentrant returns(bool) {
     uint256 unclaimed = totalClaimable-totalClaimed;
     ERC20(launchedToken).safeTransfer(owner(), unclaimed);
-    totalClaimable = totalClaimable.sub(unclaimed);
+    totalClaimable = 0;
     return true;
   }
 }
